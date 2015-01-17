@@ -85,3 +85,89 @@ server.route({
     }
 });
 ```
+
+The above `Post` service is defined like this:
+
+```javascript
+var Joi = require('joi'),
+    MongoQuery = require('lib/MongoQueryMixin'),
+    ValidateMixin = require('lib/ValidateMixin');
+
+exports[MongoQuery.collection] = 'posts';
+exports[MongoQuery.indexes] = [
+    [{slug: 1}, {unique: true}],
+    [{tags: 1}]
+];
+Object.assign(exports, MongoQuery.Mixin, ValidateMixin, {
+    schema: Joi.object().keys({
+        slug: Joi.string().required(),
+        title: Joi.string().required(),
+        content: Joi.string().required(),
+        html: Joi.string().optional(),
+        tags: Joi.array().includes(Joi.string()).optional(),
+        createdAt: Joi.date().required(),
+        updatedAt: Joi.date().required()
+    }),
+
+    getBySlug(slug) {
+        return this.findOne({ slug });
+    },
+
+    getPage(query, options = { sort: '-created', limit: 20, page: 1 }, fields = '') {
+        var { sort, limit, page } = options;
+        return this.pagedFind(query, fields, sort, limit, page);
+    },
+
+    updateById(id, data) {
+        var update = { $set: data };
+        update.$currentDate = { updatedAt: true };
+        return this.findByIdAndUpdate(id, update);
+    }
+});
+```
+
+You'll probably notice that I'm still using the `require` statement and that is
+just fine. The two mixins that I'm importing are utilities, not services.
+Being mixins however, they can naturally depend on services themself, like this:
+
+```javascript
+import { inject } from 'pioc';
+import Mongo from 'mongodb';
+import Promise from 'bluebird';
+
+/**
+* A mixin for objects that expose the following properties:
+* - [collection]: String => The collection name
+* - [indexes]: Array<IndexDefinition> => the indexes
+*/
+export var collection = Symbol();
+export var indexes = Symbol();
+export var Mixin = {
+    connection: inject('MongoConnection'),
+
+    collection() {
+        return this.connection.get().then(db => db.collection(this[collection]));
+    },
+    // ...
+};
+```
+
+This pattern is well supported by pioc and when the `Post` service is resolved,
+the `MongoConnection` service is injected into the `Post` service.
+
+If, at some point, I were to decide that I'd like to use a cache in front of
+the `Post` service, I'd just define it as the service implementation by updating
+the configuration. If I were using confidence and multiple servers, I could even
+A/B test it that way as long as the cache implementation offered the same interface.
+
+# Summary
+By using the _Inversion of Control_ pattern, you can start to decouple your application.
+Route handlers become the simple controllers they were meant to be while your service
+layer is independend, easily testable and reusable.
+
+[pioc](http://npmjs.com/package/pioc) in particular supports many styles of
+module definitions and injections and can be an important part in any modern
+application, especially for isomorphic applications.
+
+# Changelog
+- 0.1.1 Include pioc as dependency

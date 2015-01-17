@@ -1,0 +1,28 @@
+{
+    "name": "hapi-pioc",
+    "version": "0.1.0",
+    "description": "A plugin for hapi.js that integrates the pioc Dependency Injection Container for node.js",
+    "main": "index.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/pago/hapi-pioc.git"
+    },
+    "keywords": [
+        "hapi",
+        "dependency injection",
+        "provider",
+        "module",
+        "container",
+        "dependency",
+        "pioc",
+        "dic",
+        "ioc",
+        "di"
+    ],
+    "author": "Patrick Gotthardt <patrick@pagosoft.com>",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/pago/hapi-pioc/issues"
+    },
+    "homepage": "https://github.com/pago/hapi-pioc"
+}

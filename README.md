@@ -163,7 +163,7 @@ A/B test it that way as long as the cache implementation offered the same interf
 # Summary
 By using the _Inversion of Control_ pattern, you can start to decouple your application.
 Route handlers become the simple controllers they were meant to be while your service
-layer is independend, easily testable and reusable.
+layer is independent, easily testable and reusable.
 
 [pioc](http://npmjs.com/package/pioc) in particular supports many styles of
 module definitions and injections and can be an important part in any modern
